@@ -1,0 +1,51 @@
+<div id="app">
+</div>
+<script type="text/javascript">
+	var data = {"count":9,"anotherCount":10,"con":2,"arr":[1,3,9],"arr1":[{"obj":"text1","obj1":"1text"},{"obj":"text2","obj1":"2text"},{"obj":"text3","obj1":"3text"}]}
+	function _c(tag, txt){
+		var ele = document.createElement(tag)
+		if (txt){
+			ele.appendChild(document.createTextNode(txt))
+		}
+		return ele
+	}
+	function _s(val){
+		return val.toString()
+	}
+	var node0 = _c('div', '')
+	var node1 = _c('div',  _s(data.count))
+	node0.appendChild(node1)
+	var node2 = _c('button', "点击我")
+	node0.appendChild(node2)
+	var node3 = _c('div', "当前个数" +  _s(data.anotherCount))
+	node0.appendChild(node3)
+	var node4 = [];
+	for (var inx = 0; inx < data.arr.length; ++inx){
+		var text = data.arr[inx]
+		var node5 = _c('div',  _s(text))
+		node4.push(node5)
+	}
+	for (var inx = 0; inx < node4.length; ++inx){
+		node0.appendChild(node4[inx])
+	}
+	if(data.con){
+		var node6 = _c('div', '')
+		var node7 = [];
+		for (var inx = 0; inx < data.arr1.length; ++inx){
+			var item = data.arr1[inx]
+			var node8 = _c('div', '')
+			var node9 = _c('span',  _s(item.obj1))
+			node8.appendChild(node9)
+			var node10 = _c('div',  _s(item.obj))
+			node8.appendChild(node10)
+			node7.push(node8)
+		}
+		for (var inx = 0; inx < node7.length; ++inx){
+			node6.appendChild(node7[inx])
+		}
+		node0.appendChild(node6)
+	}
+	var node11 = _c('button', "更新我")
+	node0.appendChild(node11)
+	document.getElementById('app').appendChild(node0)
+</script>
