@@ -3,13 +3,19 @@ import * as HtmlParser from "node-html-parser"
 import {writeFileSync} from 'fs'
 
 var vue = '<div>\
-<div>{{count}}</div>\
-<button>点击我</button>\
-<div>当前个数{{anotherCount}}</div>\
-<div v-for="text in arr">{{text}}</div>\
-<div v-if="con"><div v-for="item in arr1"><span>{{item.obj1}}</span><div>{{item.obj}}</div></div></div>\
-<button>更新我</button>\
-</div>'
+              <div>{{count}}</div>\
+              <button>点击我</button>\
+              <div>当前个数{{anotherCount}}</div>\
+              <div v-for="text in arr">{{text}}</div>\
+              <div v-if="con">\
+                  <div v-for="item in arr1">\
+                      <span v-if="item.show">{{item.obj1}}</span>\
+                      <div>{{item.obj}}</div>\
+                      <span v-for="item1 in item.arr">{{item1}}</span>\
+                  </div>\
+              </div>\
+              <button>更新我</button>\
+          </div>'
 
 var data = {
   count: 9,
@@ -19,21 +25,28 @@ var data = {
   arr1: [
     {
       obj: "text1",
-      obj1: "1text"
+      obj1: "1text",
+      show: true,
+      arr: [1, 2,3]
     },
     {
       obj: "text2",
-      obj1: "2text"
+      obj1: "2text",
+      show: false,
+      arr: [4, 5,6]
     },
     {
       obj: "text3",
-      obj1: "3text"
+      obj1: "3text",
+      show: true,
+      arr: [7, 8,9]
     }
   ]
 }
 
-var root = VueCompilation.parseVNode(HtmlParser.parse(vue))
-var ret = VueCompilation.converToExpression(root.children[0], "data.", [], 1)
+var processedTemplate = VueCompilation.processTemplate(vue)
+var root = VueCompilation.parseVNode(HtmlParser.parse(processedTemplate).childNodes[0])
+var ret = VueCompilation.converToExpression(root, "data.", [], 1)
 var funcPrefx = 
 "\tfunction _c(tag, txt){\r\n\
 \t\tvar ele = document.createElement(tag)\r\n\

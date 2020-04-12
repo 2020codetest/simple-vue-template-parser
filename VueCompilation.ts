@@ -19,10 +19,27 @@ export interface FuncGen{
 export class VueCompilation{
     private static id: number = 0
     private static proccessLoop(text: string, node: VNode){
-        const rgx = /^\s*(\w+)\s+in\s+(\w+)\s*$/
+        const rgx = /^\s*(\w+)\s+in\s+([\w\.]+)\s*$/
         var match = rgx.exec(text)
         node.variable = match[2]
         node.item = match[1]
+    }
+
+    private static inItemChain(variable: string, itemChain: string[]): boolean{
+        var scopedVariable = false
+        for (var inx = 0; inx < itemChain.length; ++inx){
+            if (variable == itemChain[inx]){
+                scopedVariable = true;
+                break;
+            }
+
+            if (variable.startsWith(itemChain[inx] + ".")){
+                scopedVariable = true
+                break
+            }
+        }
+
+        return scopedVariable
     }
 
     private static processText(text: string, prefix: string, itemChain: string[]): string{
@@ -36,20 +53,7 @@ export class VueCompilation{
             }
 
             var variable = match[1]
-            var scopedVariable = false
-            for (var inx = 0; inx < itemChain.length; ++inx){
-                if (variable == itemChain[inx]){
-                    scopedVariable = true;
-                    break;
-                }
-
-                if (variable.startsWith(itemChain[inx] + ".")){
-                    scopedVariable = true
-                    break
-                }
-            }
-
-            outputText = outputText + " _s(" + (scopedVariable ? "" : prefix) + match[1] + ")"
+            outputText = outputText + " _s(" + (this.inItemChain(variable, itemChain) ? "" : prefix) + match[1] + ")"
             preInx = match.index + match[0].length
             match = rgx.exec(text)
         }
@@ -79,11 +83,7 @@ export class VueCompilation{
         var lineP = this.linePrefix(level)
         var nodeName = "node" + (this.id++)
         var ret = lineP + "var " + nodeName + " = [];\r\n";
-        var varaible = prefix
-        if (node.variable){
-            varaible = varaible + node.variable
-        }
-
+        var varaible = (this.inItemChain(node.variable, itemChain) ? "" : prefix) + node.variable
         var cloneItemChain:string[] = []
         for (var inx = 0; inx < itemChain.length; ++inx){
             cloneItemChain.push(itemChain[inx])
@@ -91,9 +91,10 @@ export class VueCompilation{
 
         cloneItemChain.push(node.item)
         var cloneNode: VNode = {tag: node.tag, children: node.children, text: node.text, cond: false, loop: false}
-        var gen = this.converToExpression(cloneNode, nodeName + "data.", cloneItemChain, level + 1)
-        ret = ret + lineP + "for (var inx = 0; inx < " + varaible + ".length; ++inx){\r\n"
-        ret = ret +  lineP + "\tvar " + node.item + " = " + varaible + "[inx]\r\n"
+        var gen = this.converToExpression(cloneNode, prefix, cloneItemChain, level + 1)
+        var nodeInx = nodeName + "nx"
+        ret = ret + lineP + "for (var " + nodeInx + " = 0; " +  nodeInx +" < " + varaible + ".length; ++" + nodeInx + "){\r\n"
+        ret = ret +  lineP + "\tvar " + node.item + " = " + varaible + "[" + nodeInx + "]\r\n"
         ret = ret +  gen.func
         ret = ret + lineP +  "\t" + nodeName + ".push(" + gen.node + ")\r\n"
         ret = ret +  lineP + "}\r\n"
@@ -116,15 +117,16 @@ export class VueCompilation{
             if (node.children[inx].loop){
                 var gen = this.convertToLoopExpression(node.children[inx], prefix, itemChain, level)
                 ret = ret + gen.func
-                ret = ret + lineP + "for (var inx = 0; inx < " + gen.node + ".length; ++inx){\r\n"
-                ret = ret + lineP + "\t" + nodeName + ".appendChild(" + gen.node + "[inx])\r\n"
+                var nodeInx = nodeName + "nx"
+                ret = ret + lineP + "for (var " + nodeInx + " = 0; " + nodeInx + " < " + gen.node + ".length; ++" + nodeInx + "){\r\n"
+                ret = ret + lineP + "\t" + nodeName + ".appendChild(" + gen.node + "[" + nodeInx + "])\r\n"
                 ret = ret + lineP + "}\r\n"
 
             }
             else if (node.children[inx].cond)
             {
                 var gen = this.converToExpression(node.children[inx], prefix, itemChain, level + 1)
-                ret = ret + lineP + "if(" + prefix + node.children[inx].variable + "){\r\n"
+                ret = ret + lineP + "if(" + (this.inItemChain(node.children[inx].variable, itemChain) ? "" : prefix) + node.children[inx].variable + "){\r\n"
                 ret = ret + gen.func
                 ret = ret +  lineP + "\t" + nodeName + ".appendChild(" + gen.node + ")\r\n"
                 ret = ret + lineP + "}\r\n"
@@ -171,5 +173,10 @@ export class VueCompilation{
             var text = result as HtmlParser.TextNode;
             return {tag: "", children: [], text: text.rawText, loop: false, cond: false}
         }
+    }
+
+    static processTemplate(template: string): string {
+        var rgx = />(\s+)</g
+        return template.replace(rgx, "><")
     }
 }

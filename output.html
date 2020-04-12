@@ -1,7 +1,7 @@
 <div id="app">
 </div>
 <script type="text/javascript">
-	var data = {"count":9,"anotherCount":10,"con":2,"arr":[1,3,9],"arr1":[{"obj":"text1","obj1":"1text"},{"obj":"text2","obj1":"2text"},{"obj":"text3","obj1":"3text"}]}
+	var data = {"count":9,"anotherCount":10,"con":2,"arr":[1,3,9],"arr1":[{"obj":"text1","obj1":"1text","show":true,"arr":[1,2,3]},{"obj":"text2","obj1":"2text","show":false,"arr":[4,5,6]},{"obj":"text3","obj1":"3text","show":true,"arr":[7,8,9]}]}
 	function _c(tag, txt){
 		var ele = document.createElement(tag)
 		if (txt){
@@ -20,32 +20,43 @@
 	var node3 = _c('div', "当前个数" +  _s(data.anotherCount))
 	node0.appendChild(node3)
 	var node4 = [];
-	for (var inx = 0; inx < data.arr.length; ++inx){
-		var text = data.arr[inx]
+	for (var node4nx = 0; node4nx < data.arr.length; ++node4nx){
+		var text = data.arr[node4nx]
 		var node5 = _c('div',  _s(text))
 		node4.push(node5)
 	}
-	for (var inx = 0; inx < node4.length; ++inx){
-		node0.appendChild(node4[inx])
+	for (var node0nx = 0; node0nx < node4.length; ++node0nx){
+		node0.appendChild(node4[node0nx])
 	}
 	if(data.con){
 		var node6 = _c('div', '')
 		var node7 = [];
-		for (var inx = 0; inx < data.arr1.length; ++inx){
-			var item = data.arr1[inx]
+		for (var node7nx = 0; node7nx < data.arr1.length; ++node7nx){
+			var item = data.arr1[node7nx]
 			var node8 = _c('div', '')
-			var node9 = _c('span',  _s(item.obj1))
-			node8.appendChild(node9)
+			if(item.show){
+				var node9 = _c('span',  _s(item.obj1))
+				node8.appendChild(node9)
+			}
 			var node10 = _c('div',  _s(item.obj))
 			node8.appendChild(node10)
+			var node11 = [];
+			for (var node11nx = 0; node11nx < item.arr.length; ++node11nx){
+				var item1 = item.arr[node11nx]
+				var node12 = _c('span',  _s(item1))
+				node11.push(node12)
+			}
+			for (var node8nx = 0; node8nx < node11.length; ++node8nx){
+				node8.appendChild(node11[node8nx])
+			}
 			node7.push(node8)
 		}
-		for (var inx = 0; inx < node7.length; ++inx){
-			node6.appendChild(node7[inx])
+		for (var node6nx = 0; node6nx < node7.length; ++node6nx){
+			node6.appendChild(node7[node6nx])
 		}
 		node0.appendChild(node6)
 	}
-	var node11 = _c('button', "更新我")
-	node0.appendChild(node11)
+	var node13 = _c('button', "更新我")
+	node0.appendChild(node13)
 	document.getElementById('app').appendChild(node0)
 </script>
